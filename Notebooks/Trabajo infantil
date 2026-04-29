@@ -1,0 +1,63 @@
+import pandas as pd
+import numpy as np
+
+# ─────────────────────────────────────────────
+# 1. Carga de datos
+# ─────────────────────────────────────────────
+df = pd.read_excel("C:\Users\felip\Downloads")
+
+print("=" * 60)
+print("ANÁLISIS ESTADÍSTICO DESCRIPTIVO")
+print("=" * 60)
+print(f"\nDimensiones del dataset: {df.shape[0]} filas × {df.shape[1]} columnas")
+print(f"Variables: {df.columns.tolist()}\n")
+
+# ─────────────────────────────────────────────
+# 2. Cálculo de estadísticas por variable
+# ─────────────────────────────────────────────
+resultados = []
+
+for col in df.columns:
+    serie = df[col]
+
+    # Valores nulos
+    nulos = int(serie.isnull().sum())
+
+    # Solo estadísticas numéricas para columnas numéricas
+    if pd.api.types.is_numeric_dtype(serie):
+        media     = round(serie.mean(), 4)
+        mediana   = round(serie.median(), 4)
+        moda_vals = serie.mode()
+        moda      = round(moda_vals[0], 4) if not moda_vals.empty else np.nan
+        desv_std  = round(serie.std(), 4)
+        maximo    = round(serie.max(), 4)
+        minimo    = round(serie.min(), 4)
+    else:
+        media = mediana = moda = desv_std = maximo = minimo = "N/A"
+
+    resultados.append({
+        "Variable"           : col,
+        "Media"              : media,
+        "Mediana"            : mediana,
+        "Moda"               : moda,
+        "Desv. Estándar"     : desv_std,
+        "Mínimo"             : minimo,
+        "Máximo"             : maximo,
+        "Valores Nulos"      : nulos,
+    })
+
+# ─────────────────────────────────────────────
+# 3. Mostrar resultados en consola
+# ─────────────────────────────────────────────
+resumen = pd.DataFrame(resultados).set_index("Variable")
+pd.set_option("display.float_format", "{:,.4f}".format)
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", 120)
+
+print(resumen.to_string())
+
+# ─────────────────────────────────────────────
+# 4. Exportar resultados a Excel
+# ─────────────────────────────────────────────
+resumen.to_excel("resumen_estadistico.xlsx")
+print("\n✔ Resultados exportados a: resumen_estadistico.xlsx")
